@@ -146,12 +146,6 @@ The dashboard, data analysis, ML risk model, scenarios, charts, incidents, what-
 
 The Copilot will return verified deterministic evidence instead of a Groq-generated response.
 
-### Important `.env` note
-
-Do not upload `.env` to a public GitHub repository.
-
-Use `.env.example` as the safe template. Share a real `.env` file only privately with trusted collaborators when necessary.
-
 ## 6. Install frontend dependencies
 
 ```powershell
@@ -249,13 +243,6 @@ Open the application:
 http://localhost:5173/
 ```
 
-## 9. Stop the application
-
-In both running terminals, press:
-
-```text
-Ctrl + C
-```
 
 ## Common issues
 

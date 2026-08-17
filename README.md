@@ -88,8 +88,6 @@ python -m venv .venv
 
 ## 5. Configure `.env`
 
-The `.env` file is optional. It controls whether the Copilot uses Groq AI or verified deterministic fallback responses.
-
 ### Case A — `.env` already exists and contains a valid Groq key
 
 No extra configuration is needed. Continue to Step 6.

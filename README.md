@@ -1,137 +1,168 @@
-# Industrial Intelligence Copilot
+# Industrial Intelligence Copilot — Local Run Guide
 
-An evidence-first industrial operations prototype for monitoring machine conditions, detecting failure risk, investigating incidents with a bounded AI copilot, and comparing proposed operating points before an engineer acts.
+This guide explains how to run the project after cloning the repository.
 
-The system combines transparent engineering rules, calibrated machine-learning risk estimates, statistical evidence, similar-condition retrieval, and optional Groq or Gemini language-model explanations. Numerical claims are calculated by backend tools; the language model plans permitted evidence checks and communicates verified results.
+## Prerequisites
 
-## What the product does
+Install these before starting:
 
-- Replays original AI4I observations or runs disclosed OSF, HDF, and PWF scenarios.
-- Streams machine telemetry through a live operational twin.
-- Calculates temperature delta, mechanical power, overstrain load, and engineering-rule margins.
-- Estimates calibrated machine-failure risk with persisted scikit-learn pipelines.
-- Opens incidents from deterministic policy thresholds and preserves their evidence context.
-- Compares recent telemetry with a baseline window.
-- Retrieves similar AI4I operating conditions and reports their observed outcomes.
-- Lets an operator ask Quick or Deep incident questions through a constrained AI workflow.
-- Recalculates proposed what-if settings through the same backend model and rules.
-- Creates local maintenance-action drafts without issuing machine commands.
+- Git — needed to clone the repository
+- Python 3.11.x
+- Node.js 18.16 or newer
+- npm — included automatically with Node.js
+- Internet connection — required during the first installation and for optional Groq AI responses
 
-## System architecture
+Check that they are installed:
 
-```mermaid
-flowchart LR
-    A["AI4I CSV or disclosed scenario"] --> B["Schema validation"]
-    B --> C["Engineering features and rule margins"]
-    C --> D["Calibrated ML risk model"]
-    C --> E["Incident policy"]
-    D --> E
-    E --> F["FastAPI evidence services"]
-    F --> G["React operations dashboard"]
-    F --> H["Bounded AI investigation"]
-    H --> I["Grounding and safety validation"]
-    I --> G
+```powershell
+python --version
+node --version
+npm --version
+git --version
 ```
 
-The implementation follows a calculation-first design:
-
-1. Backend code validates inputs and calculates evidence.
-2. Registered tools expose only approved analytical operations.
-3. The AI planner may select from those permitted tools.
-4. The model receives compact evidence atoms, not unrestricted data or code access.
-5. Grounding checks validate the generated answer against the evidence ledger.
-6. Provider errors or invalid output trigger a verified deterministic fallback.
-
-## Repository layout
+Recommended tested versions:
 
 ```text
-industrial-intelligence-copilot/
-├── data/                    # AI4I source data and data notes
-├── docs/                    # Domain, logic, math, and provider setup
-├── frontend/                # React and Vite operations dashboard
-├── models/                  # Persisted calibrated model pipelines and metadata
-├── notebooks/               # Reproducible exploratory analysis
-├── scripts/                 # Data, analysis, model, and preview utilities
-├── src/industrial_copilot/  # Python application package
-│   ├── analytics/           # Descriptive analytics and charts
-│   ├── api/                 # FastAPI routes and request schemas
-│   ├── copilot/             # Evidence-first conversation service
-│   ├── data/                # Loading, schema, and audit logic
-│   ├── features/            # Engineering feature calculations
-│   ├── knowledge/           # Versioned domain knowledge and retrieval
-│   ├── llm/                 # Groq/Gemini clients and structured contracts
-│   ├── ml/                  # Training, evaluation, persistence, prediction
-│   ├── simulation/          # Replay, scenarios, incidents, and what-if logic
-│   ├── statistics/          # Conditional and adjusted statistical evidence
-│   └── tools/               # Validated tool registry
-└── tests/                   # Unit, API, AI, scenario, and regression tests
+Python 3.11.4
+Node.js 18.16.1
 ```
 
-## Dataset
+No Docker, Poetry, uv, database, Jupyter, or globally installed Python/Node packages are required.
 
-The project uses the **AI4I 2020 Predictive Maintenance Dataset**, created by Stephan Matzka and published by the UCI Machine Learning Repository.
+## 1. Clone the repository
 
-- 10,000 synthetic manufacturing observations
-- Six operating inputs: product type, air temperature, process temperature, rotational speed, torque, and tool wear
-- One overall machine-failure target
-- Five failure-mode flags: TWF, HDF, PWF, OSF, and RNF
-- DOI: [10.24432/C5HS5C](https://doi.org/10.24432/C5HS5C)
-- License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+```powershell
+git clone https://github.com/YOUR_USERNAME/industrial-intelligence-copilot.git
+cd industrial-intelligence-copilot
+```
 
-The raw CSV is not edited. The loader validates its exact schema and renames source identifier `UDI` to application identifier `UID` only in memory. No raw row is removed, smoothed, imputed, or relabelled.
+Replace the URL with the actual GitHub repository URL.
 
-The live OSF, HDF, and PWF scenarios are clearly identified as synthetic scenarios derived from documented AI4I mechanisms. They are not presented as plant telemetry. AI4I Replay uses original dataset rows.
+## 2. Check required project files
 
-## Engineering and model logic
+Run:
 
-Calculated operating features include:
+```powershell
+Test-Path data\raw\ai4i2020.csv
+Test-Path models\training_metrics.json
+```
 
-- Temperature delta: process temperature minus air temperature.
-- Mechanical power: torque multiplied by angular velocity.
-- Overstrain load: torque multiplied by tool wear.
-- OSF margin: product-specific threshold minus overstrain load.
-- HDF and PWF margins: distance from documented rule boundaries.
+Both commands should return:
 
-The ML layer uses leakage-safe inputs. `Machine failure` and all failure-mode flags are excluded from model features. Persisted Logistic Regression and Random Forest pipelines include preprocessing and probability calibration. The primary augmented Random Forest model achieved these held-out results on the reproducible split:
+```text
+True
+```
 
-| Metric | Value |
-|---|---:|
-| PR-AUC | 0.871 |
-| ROC-AUC | 0.978 |
-| Brier score | 0.0076 |
+If the data file is missing, run:
 
-These scores describe the synthetic benchmark split and are not claims of real-plant performance.
+```powershell
+python scripts\download_data.py
+```
 
-## AI copilot
+If the model files are missing, complete Python setup first, then run:
 
-The optional AI layer is fully integrated when enabled:
+```powershell
+.\.venv\Scripts\python.exe scripts\train_models.py
+```
 
-- **Quick** performs one bounded evidence round and returns a concise grounded response.
-- **Deep** creates a structured investigation plan, runs permitted evidence checks, retrieves knowledge, and exposes a trace.
+## 3. Create the Python environment
 
-Answers can show their provider or fallback status, deterministic evidence, evidence atoms and authority, selected tools, investigation objective, knowledge references, grounding status, and limitations.
+```powershell
+py -3.11 -m venv .venv
+```
 
-The AI cannot execute arbitrary Python, SQL, shell commands, or unknown tool names. It does not invent sensor readings, remaining useful life, root cause, or plant history. Provider failures fall back to deterministic evidence instead of breaking the workflow.
-
-## Requirements
-
-- Python 3.11+
-- Node.js 18+
-- npm
-
-## Installation
-
-From the repository root in PowerShell:
+If `py -3.11` does not work, use:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements-dev.txt
-python -m pip install -e .
 ```
 
-Install the frontend:
+## 4. Install Python dependencies
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m pip install -e .
+```
+
+## 5. Configure `.env`
+
+The `.env` file is optional. It controls whether the Copilot uses Groq AI or verified deterministic fallback responses.
+
+### Case A — `.env` already exists and contains a valid Groq key
+
+No extra configuration is needed. Continue to Step 6.
+
+### Case B — `.env` does not exist
+
+Create it:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then open it:
+
+```powershell
+notepad .env
+```
+
+### Case C — use Groq AI
+
+Set these values in `.env`:
+
+```dotenv
+LLM_ENABLED=true
+LLM_PROVIDER=groq
+GROQ_API_KEY=YOUR_GROQ_API_KEY
+GROQ_MODEL=openai/gpt-oss-120b
+GROQ_TIMEOUT_SECONDS=20
+```
+
+Test Groq:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\check_groq.py
+```
+
+Expected result:
+
+```text
+Result: AVAILABLE
+```
+
+### Case D — no Groq key, invalid key, or Groq free-tier rate limit
+
+Set:
+
+```dotenv
+LLM_ENABLED=false
+LLM_PROVIDER=groq
+GROQ_API_KEY=
+```
+
+The project still works normally.
+
+The dashboard, data analysis, ML risk model, scenarios, charts, incidents, what-if analysis, and maintenance workflow remain available.
+
+The Copilot will return verified deterministic evidence instead of a Groq-generated response.
+
+### Important `.env` note
+
+Do not upload `.env` to a public GitHub repository.
+
+Use `.env.example` as the safe template. Share a real `.env` file only privately with trusted collaborators when necessary.
+
+## 6. Install frontend dependencies
+
+```powershell
+cd frontend
+npm ci
+cd ..
+```
+
+If `npm ci` fails, use:
 
 ```powershell
 cd frontend
@@ -139,109 +170,118 @@ npm install
 cd ..
 ```
 
-If data or model artifacts are absent, recreate them with:
+## 7. Optional verification
+
+Run backend tests:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\download_data.py
-.\.venv\Scripts\python.exe scripts\train_models.py
+.\.venv\Scripts\python.exe -m pytest -q
 ```
 
-## Configuration
+Expected:
 
-Copy the example configuration and keep real secrets only in `.env`:
+```text
+87 passed
+```
+
+Run code checks:
 
 ```powershell
-Copy-Item .env.example .env
+.\.venv\Scripts\python.exe -m ruff check .
 ```
 
-For Groq:
+Expected:
 
-```dotenv
-LLM_ENABLED=true
-LLM_PROVIDER=groq
-GROQ_API_KEY=
-GROQ_MODEL=openai/gpt-oss-120b
+```text
+All checks passed!
 ```
 
-Add the key only to `.env`. Never add it to `.env.example` or commit it. Provider instructions are in `docs/GROQ_SETUP.md` and `docs/GEMINI_SETUP.md`.
+Build the frontend:
 
-The frontend defaults to `/api`, which Vite proxies to FastAPI. Deployments can override this with `VITE_API_BASE_URL`; see `frontend/.env.example`.
+```powershell
+cd frontend
+npm run build
+cd ..
+```
 
-## Run the application
+## 8. Start the application
 
-Terminal 1 — backend:
+Open two PowerShell terminals.
+
+### Terminal 1 — backend
+
+From the repository root:
 
 ```powershell
 .\.venv\Scripts\python.exe -m uvicorn industrial_copilot.api.main:app --reload
 ```
 
-- Health: `http://127.0.0.1:8000/health`
-- API documentation: `http://127.0.0.1:8000/docs`
+Expected:
 
-Terminal 2 — frontend:
+```text
+Uvicorn running on http://127.0.0.1:8000
+Application startup complete.
+```
+
+Backend URLs:
+
+```text
+http://127.0.0.1:8000/health
+http://127.0.0.1:8000/docs
+```
+
+### Terminal 2 — frontend
+
+From the repository root:
 
 ```powershell
 cd frontend
 npm run dev
 ```
 
-Open `http://localhost:5173/`.
+Expected:
 
-## Typical workflow
+```text
+Local: http://localhost:5173/
+```
 
-1. Select OSF, HDF, PWF, or AI4I Replay.
-2. Press **Start** and watch the telemetry and incident state evolve.
-3. Review the incident reason, risk, margins, recent changes, and similar cases.
-4. Choose **Quick** or **Deep**, then ask an incident question.
-5. Inspect the evidence and investigation trace behind the answer.
-6. Adjust the what-if controls and press **Recalculate proposed outcome**.
-7. Review suggested checks and optionally create a local maintenance-action draft.
-8. Switch scenarios; state and copilot conversation reset to the new context.
+Open the application:
 
-## API surface
+```text
+http://localhost:5173/
+```
 
-Important routes include `GET /health`, `GET /dataset/summary`, `GET /audit`, `POST /analyze`, `POST /investigate`, `POST /live/state`, `POST /live/copilot`, `POST /live/what-if`, `POST /predict`, and `POST /similar`. The interactive page at `/docs` contains request and response schemas.
+## 9. Stop the application
 
-## Verification
+In both running terminals, press:
+
+```text
+Ctrl + C
+```
+
+## Common issues
+
+### `python` or `py` is not recognized
+
+Install Python 3.11 and select **Add Python to PATH** during installation.
+
+### `node` or `npm` is not recognized
+
+Install Node.js LTS, then close and reopen PowerShell or VS Code.
+
+### Port 8000 is already in use
+
+Stop the older backend terminal with `Ctrl + C`, then start the backend again.
+
+### Port 5173 is already in use
+
+Stop the older frontend terminal with `Ctrl + C`, then run:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m ruff check .
 cd frontend
-npm run build
+npm run dev
 ```
 
-Optional backend checks:
+### Groq answer shows `Verified fallback`
 
-```powershell
-.\.venv\Scripts\python.exe scripts\run_demo_checks.py
-.\.venv\Scripts\python.exe scripts\run_statistics_demo.py
-.\.venv\Scripts\python.exe scripts\run_offline_copilot_demo.py
-```
-
-## Reproducibility
-
-- The loader enforces an exact schema contract.
-- Training uses a fixed random seed and a stratified held-out split.
-- Model metadata records features, metrics, thresholds, and calibration output.
-- `scikit-learn==1.9.0` matches the distributed serialized artifacts.
-- Synthetic scenarios and their triggering rules are deterministic and tested.
-- AI answers retain deterministic evidence and provider/fallback status.
-
-## Limitations and production considerations
-
-- AI4I is synthetic, cross-sectional benchmark data, not timestamped plant history.
-- Scenario telemetry is simulated; there is no PLC, historian, CMMS, or control-system connection.
-- Similar AI4I observations are benchmark evidence, not real maintenance cases.
-- Associations and model outputs do not establish root cause.
-- The system does not estimate remaining useful life.
-- What-if analysis does not send commands.
-- Production requires site-specific validation, sensor and unit contracts, drift monitoring, authentication, authorization, audit retention, secret management, rate limits, an explicit CORS allowlist, observability, and human approval workflows.
-
-## Additional documentation
-
-- `docs/01_DOMAIN_AND_DATASET.md` — domain and column guide
-- `docs/02_PROJECT_LOGIC_AND_AI.md` — calculations, models, and AI design
-- `docs/MATH_AND_STATS_GUIDE.md` — statistical methods in plain language
-- `docs/GROQ_SETUP.md` — Groq configuration and testing
-- `docs/GEMINI_SETUP.md` — Gemini configuration and testing
+This is expected when Groq is disabled, the key is unavailable, the key is invalid, or the Groq free-tier limit is temporarily reached. The application remains usable.

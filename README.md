@@ -90,6 +90,7 @@ python -m venv .venv
 
 ### Case A — `.env` already exists and contains a valid Groq key
 
+Make the .env file exactly like this - https://docs.google.com/document/d/1GudLLCB3ML70q4o9Afk6IiJCf9dwKu7nKtRO0dpBQ38/edit?usp=sharing
 No extra configuration is needed. Continue to Step 6.
 
 ### Case B — `.env` does not exist

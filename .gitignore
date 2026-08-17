@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Environments and secrets
+.venv/
+venv/
+.env
+
+# Frontend dependencies and generated bundle
+frontend/node_modules/
+frontend/dist/
+
+# Local data and model artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+models/*
+!models/.gitkeep
+artifacts/
+.verification_package_stage_*/
+
+# Notebook checkpoints and editor files
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+*.log
+*.bak
+*~
+!data/raw/ai4i2020.csv
+!models/*.joblib
+!models/training_metrics.json

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Evidence-first industrial operations console." />
+    <title>Industrial Intelligence Copilot</title>
+  </head>
+  <body>
+    <div id="root"><pre id="startup-probe" style="margin:2rem;color:#d9edf5;font:14px monospace">Loading Industrial Intelligence Copilot…</pre></div>
+    <script>
+      const showStartupError = (message) => {
+        const root = document.getElementById("root");
+        if (root) {
+          root.innerHTML = `<pre style="white-space:pre-wrap;margin:2rem;padding:1rem;border:1px solid #ef7478;border-radius:8px;background:#23171a;color:#ffecef;font:14px monospace">Frontend startup error\n\n${String(message)}</pre>`;
+        }
+      };
+      window.addEventListener("error", (event) => showStartupError(event.error?.stack || event.message));
+      window.addEventListener("unhandledrejection", (event) => showStartupError(event.reason?.stack || event.reason));
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

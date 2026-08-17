@@ -1,0 +1,776 @@
+{
+  "target": "Machine failure",
+  "random_state": 42,
+  "test_fraction": 0.2,
+  "results": [
+    {
+      "model_name": "logistic_regression",
+      "feature_set": "raw",
+      "input_features": [
+        "Type",
+        "Air temperature [K]",
+        "Process temperature [K]",
+        "Rotational speed [rpm]",
+        "Torque [Nm]",
+        "Tool wear [min]"
+      ],
+      "train_observation_count": 8000,
+      "test_observation_count": 2000,
+      "train_failure_rate": 0.033875,
+      "test_failure_rate": 0.034,
+      "uncalibrated": {
+        "pr_auc": 0.38176196610560775,
+        "roc_auc": 0.9069540859822189,
+        "precision": 0.14177215189873418,
+        "recall": 0.8235294117647058,
+        "f1": 0.24190064794816415,
+        "brier_score": 0.12207506222963517,
+        "confusion_matrix": {
+          "true_negative": 1593,
+          "false_positive": 339,
+          "false_negative": 12,
+          "true_positive": 56
+        },
+        "calibration_curve": [
+          {
+            "bin_lower": 0.0,
+            "bin_upper": 0.1,
+            "observation_count": 739,
+            "mean_predicted_probability": 0.043929637724188404,
+            "observed_failure_rate": 0.0013531799729364006
+          },
+          {
+            "bin_lower": 0.1,
+            "bin_upper": 0.2,
+            "observation_count": 364,
+            "mean_predicted_probability": 0.14588248371513052,
+            "observed_failure_rate": 0.005494505494505495
+          },
+          {
+            "bin_lower": 0.2,
+            "bin_upper": 0.3,
+            "observation_count": 212,
+            "mean_predicted_probability": 0.24655342880976866,
+            "observed_failure_rate": 0.009433962264150943
+          },
+          {
+            "bin_lower": 0.3,
+            "bin_upper": 0.4,
+            "observation_count": 155,
+            "mean_predicted_probability": 0.3475512934107484,
+            "observed_failure_rate": 0.012903225806451613
+          },
+          {
+            "bin_lower": 0.4,
+            "bin_upper": 0.5,
+            "observation_count": 135,
+            "mean_predicted_probability": 0.44455510725340086,
+            "observed_failure_rate": 0.037037037037037035
+          },
+          {
+            "bin_lower": 0.5,
+            "bin_upper": 0.6,
+            "observation_count": 111,
+            "mean_predicted_probability": 0.5478130443765777,
+            "observed_failure_rate": 0.036036036036036036
+          },
+          {
+            "bin_lower": 0.6,
+            "bin_upper": 0.7,
+            "observation_count": 84,
+            "mean_predicted_probability": 0.6522020304629865,
+            "observed_failure_rate": 0.023809523809523808
+          },
+          {
+            "bin_lower": 0.7,
+            "bin_upper": 0.8,
+            "observation_count": 82,
+            "mean_predicted_probability": 0.7463113561966058,
+            "observed_failure_rate": 0.12195121951219512
+          },
+          {
+            "bin_lower": 0.8,
+            "bin_upper": 0.9,
+            "observation_count": 65,
+            "mean_predicted_probability": 0.8497137386345802,
+            "observed_failure_rate": 0.26153846153846155
+          },
+          {
+            "bin_lower": 0.9,
+            "bin_upper": 1.0,
+            "observation_count": 53,
+            "mean_predicted_probability": 0.9436560634953421,
+            "observed_failure_rate": 0.4339622641509434
+          }
+        ],
+        "threshold": 0.5
+      },
+      "calibrated": {
+        "pr_auc": 0.3821933639588657,
+        "roc_auc": 0.9068627450980393,
+        "precision": 0.6153846153846154,
+        "recall": 0.11764705882352941,
+        "f1": 0.19753086419753085,
+        "brier_score": 0.025835184620690878,
+        "confusion_matrix": {
+          "true_negative": 1927,
+          "false_positive": 5,
+          "false_negative": 60,
+          "true_positive": 8
+        },
+        "calibration_curve": [
+          {
+            "bin_lower": 0.0,
+            "bin_upper": 0.1,
+            "observation_count": 1841,
+            "mean_predicted_probability": 0.014148147429435126,
+            "observed_failure_rate": 0.013036393264530146
+          },
+          {
+            "bin_lower": 0.1,
+            "bin_upper": 0.2,
+            "observation_count": 84,
+            "mean_predicted_probability": 0.13764179210974867,
+            "observed_failure_rate": 0.17857142857142858
+          },
+          {
+            "bin_lower": 0.2,
+            "bin_upper": 0.3,
+            "observation_count": 30,
+            "mean_predicted_probability": 0.23854828135519224,
+            "observed_failure_rate": 0.3
+          },
+          {
+            "bin_lower": 0.3,
+            "bin_upper": 0.4,
+            "observation_count": 22,
+            "mean_predicted_probability": 0.35119675875030165,
+            "observed_failure_rate": 0.45454545454545453
+          },
+          {
+            "bin_lower": 0.4,
+            "bin_upper": 0.5,
+            "observation_count": 10,
+            "mean_predicted_probability": 0.43934539936095296,
+            "observed_failure_rate": 0.2
+          },
+          {
+            "bin_lower": 0.5,
+            "bin_upper": 0.6,
+            "observation_count": 5,
+            "mean_predicted_probability": 0.5489319457869125,
+            "observed_failure_rate": 0.2
+          },
+          {
+            "bin_lower": 0.6,
+            "bin_upper": 0.7,
+            "observation_count": 3,
+            "mean_predicted_probability": 0.6842426288454214,
+            "observed_failure_rate": 0.6666666666666666
+          },
+          {
+            "bin_lower": 0.7,
+            "bin_upper": 0.8,
+            "observation_count": 4,
+            "mean_predicted_probability": 0.7593916153108189,
+            "observed_failure_rate": 1.0
+          },
+          {
+            "bin_lower": 0.9,
+            "bin_upper": 1.0,
+            "observation_count": 1,
+            "mean_predicted_probability": 0.9188858215196598,
+            "observed_failure_rate": 1.0
+          }
+        ],
+        "threshold": 0.5
+      },
+      "calibration_method": "sigmoid calibration with 3-fold cross-validation",
+      "note": "Metrics are calculated on a stratified test set untouched by estimator fitting and probability calibration. Accuracy is intentionally not reported."
+    },
+    {
+      "model_name": "random_forest",
+      "feature_set": "raw",
+      "input_features": [
+        "Type",
+        "Air temperature [K]",
+        "Process temperature [K]",
+        "Rotational speed [rpm]",
+        "Torque [Nm]",
+        "Tool wear [min]"
+      ],
+      "train_observation_count": 8000,
+      "test_observation_count": 2000,
+      "train_failure_rate": 0.033875,
+      "test_failure_rate": 0.034,
+      "uncalibrated": {
+        "pr_auc": 0.7557237205831827,
+        "roc_auc": 0.9569594142004628,
+        "precision": 0.803921568627451,
+        "recall": 0.6029411764705882,
+        "f1": 0.6890756302521008,
+        "brier_score": 0.015877916738482916,
+        "confusion_matrix": {
+          "true_negative": 1922,
+          "false_positive": 10,
+          "false_negative": 27,
+          "true_positive": 41
+        },
+        "calibration_curve": [
+          {
+            "bin_lower": 0.0,
+            "bin_upper": 0.1,
+            "observation_count": 1797,
+            "mean_predicted_probability": 0.0077321262278168545,
+            "observed_failure_rate": 0.00333889816360601
+          },
+          {
+            "bin_lower": 0.1,
+            "bin_upper": 0.2,
+            "observation_count": 71,
+            "mean_predicted_probability": 0.14239465061155618,
+            "observed_failure_rate": 0.056338028169014086
+          },
+          {
+            "bin_lower": 0.2,
+            "bin_upper": 0.3,
+            "observation_count": 38,
+            "mean_predicted_probability": 0.2462098312902917,
+            "observed_failure_rate": 0.10526315789473684
+          },
+          {
+            "bin_lower": 0.3,
+            "bin_upper": 0.4,
+            "observation_count": 27,
+            "mean_predicted_probability": 0.3465033867896011,
+            "observed_failure_rate": 0.14814814814814814
+          },
+          {
+            "bin_lower": 0.4,
+            "bin_upper": 0.5,
+            "observation_count": 16,
+            "mean_predicted_probability": 0.4363963653516645,
+            "observed_failure_rate": 0.5625
+          },
+          {
+            "bin_lower": 0.5,
+            "bin_upper": 0.6,
+            "observation_count": 17,
+            "mean_predicted_probability": 0.5594866509561225,
+            "observed_failure_rate": 0.6470588235294118
+          },
+          {
+            "bin_lower": 0.6,
+            "bin_upper": 0.7,
+            "observation_count": 13,
+            "mean_predicted_probability": 0.6384178966252321,
+            "observed_failure_rate": 0.7692307692307693
+          },
+          {
+            "bin_lower": 0.7,
+            "bin_upper": 0.8,
+            "observation_count": 12,
+            "mean_predicted_probability": 0.7447611069701314,
+            "observed_failure_rate": 1.0
+          },
+          {
+            "bin_lower": 0.8,
+            "bin_upper": 0.9,
+            "observation_count": 8,
+            "mean_predicted_probability": 0.833918255376645,
+            "observed_failure_rate": 0.875
+          },
+          {
+            "bin_lower": 0.9,
+            "bin_upper": 1.0,
+            "observation_count": 1,
+            "mean_predicted_probability": 0.918782320455166,
+            "observed_failure_rate": 1.0
+          }
+        ],
+        "threshold": 0.5
+      },
+      "calibrated": {
+        "pr_auc": 0.719836463375389,
+        "roc_auc": 0.962405614419681,
+        "precision": 0.7735849056603774,
+        "recall": 0.6029411764705882,
+        "f1": 0.6776859504132231,
+        "brier_score": 0.015900586646041773,
+        "confusion_matrix": {
+          "true_negative": 1920,
+          "false_positive": 12,
+          "false_negative": 27,
+          "true_positive": 41
+        },
+        "calibration_curve": [
+          {
+            "bin_lower": 0.0,
+            "bin_upper": 0.1,
+            "observation_count": 1895,
+            "mean_predicted_probability": 0.0083724648277206,
+            "observed_failure_rate": 0.007387862796833773
+          },
+          {
+            "bin_lower": 0.1,
+            "bin_upper": 0.2,
+            "observation_count": 20,
+            "mean_predicted_probability": 0.1459329362080617,
+            "observed_failure_rate": 0.15
+          },
+          {
+            "bin_lower": 0.2,
+            "bin_upper": 0.3,
+            "observation_count": 10,
+            "mean_predicted_probability": 0.26225641878076505,
+            "observed_failure_rate": 0.3
+          },
+          {
+            "bin_lower": 0.3,
+            "bin_upper": 0.4,
+            "observation_count": 11,
+            "mean_predicted_probability": 0.3356814289926414,
+            "observed_failure_rate": 0.36363636363636365
+          },
+          {
+            "bin_lower": 0.4,
+            "bin_upper": 0.5,
+            "observation_count": 11,
+            "mean_predicted_probability": 0.44490359699398835,
+            "observed_failure_rate": 0.2727272727272727
+          },
+          {
+            "bin_lower": 0.5,
+            "bin_upper": 0.6,
+            "observation_count": 11,
+            "mean_predicted_probability": 0.5463654382679243,
+            "observed_failure_rate": 0.5454545454545454
+          },
+          {
+            "bin_lower": 0.6,
+            "bin_upper": 0.7,
+            "observation_count": 11,
+            "mean_predicted_probability": 0.638453469823816,
+            "observed_failure_rate": 0.8181818181818182
+          },
+          {
+            "bin_lower": 0.7,
+            "bin_upper": 0.8,
+            "observation_count": 9,
+            "mean_predicted_probability": 0.7361025592725438,
+            "observed_failure_rate": 0.6666666666666666
+          },
+          {
+            "bin_lower": 0.8,
+            "bin_upper": 0.9,
+            "observation_count": 7,
+            "mean_predicted_probability": 0.8577684029003415,
+            "observed_failure_rate": 0.8571428571428571
+          },
+          {
+            "bin_lower": 0.9,
+            "bin_upper": 1.0,
+            "observation_count": 15,
+            "mean_predicted_probability": 0.9492197514891336,
+            "observed_failure_rate": 0.9333333333333333
+          }
+        ],
+        "threshold": 0.5
+      },
+      "calibration_method": "sigmoid calibration with 3-fold cross-validation",
+      "note": "Metrics are calculated on a stratified test set untouched by estimator fitting and probability calibration. Accuracy is intentionally not reported."
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set": "engineering_augmented",
+      "input_features": [
+        "Type",
+        "Air temperature [K]",
+        "Process temperature [K]",
+        "Rotational speed [rpm]",
+        "Torque [Nm]",
+        "Tool wear [min]",
+        "Temperature delta [K]",
+        "Mechanical power [W]",
+        "Overstrain load [min Nm]"
+      ],
+      "train_observation_count": 8000,
+      "test_observation_count": 2000,
+      "train_failure_rate": 0.033875,
+      "test_failure_rate": 0.034,
+      "uncalibrated": {
+        "pr_auc": 0.4297030345248936,
+        "roc_auc": 0.9385047497259774,
+        "precision": 0.1791044776119403,
+        "recall": 0.8823529411764706,
+        "f1": 0.2977667493796526,
+        "brier_score": 0.10415995271800106,
+        "confusion_matrix": {
+          "true_negative": 1657,
+          "false_positive": 275,
+          "false_negative": 8,
+          "true_positive": 60
+        },
+        "calibration_curve": [
+          {
+            "bin_lower": 0.0,
+            "bin_upper": 0.1,
+            "observation_count": 899,
+            "mean_predicted_probability": 0.03382448133812005,
+            "observed_failure_rate": 0.0011123470522803114
+          },
+          {
+            "bin_lower": 0.1,
+            "bin_upper": 0.2,
+            "observation_count": 320,
+            "mean_predicted_probability": 0.14306668179289478,
+            "observed_failure_rate": 0.003125
+          },
+          {
+            "bin_lower": 0.2,
+            "bin_upper": 0.3,
+            "observation_count": 190,
+            "mean_predicted_probability": 0.24688588371632303,
+            "observed_failure_rate": 0.010526315789473684
+          },
+          {
+            "bin_lower": 0.3,
+            "bin_upper": 0.4,
+            "observation_count": 133,
+            "mean_predicted_probability": 0.3472600122061178,
+            "observed_failure_rate": 0.015037593984962405
+          },
+          {
+            "bin_lower": 0.4,
+            "bin_upper": 0.5,
+            "observation_count": 123,
+            "mean_predicted_probability": 0.44941271294808527,
+            "observed_failure_rate": 0.016260162601626018
+          },
+          {
+            "bin_lower": 0.5,
+            "bin_upper": 0.6,
+            "observation_count": 88,
+            "mean_predicted_probability": 0.5492463936671409,
+            "observed_failure_rate": 0.03409090909090909
+          },
+          {
+            "bin_lower": 0.6,
+            "bin_upper": 0.7,
+            "observation_count": 57,
+            "mean_predicted_probability": 0.6495317245448076,
+            "observed_failure_rate": 0.05263157894736842
+          },
+          {
+            "bin_lower": 0.7,
+            "bin_upper": 0.8,
+            "observation_count": 79,
+            "mean_predicted_probability": 0.7516166973827185,
+            "observed_failure_rate": 0.16455696202531644
+          },
+          {
+            "bin_lower": 0.8,
+            "bin_upper": 0.9,
+            "observation_count": 53,
+            "mean_predicted_probability": 0.8503484443569876,
+            "observed_failure_rate": 0.22641509433962265
+          },
+          {
+            "bin_lower": 0.9,
+            "bin_upper": 1.0,
+            "observation_count": 58,
+            "mean_predicted_probability": 0.9568187376233255,
+            "observed_failure_rate": 0.5
+          }
+        ],
+        "threshold": 0.5
+      },
+      "calibrated": {
+        "pr_auc": 0.43379541912208003,
+        "roc_auc": 0.9379719279015954,
+        "precision": 0.6086956521739131,
+        "recall": 0.20588235294117646,
+        "f1": 0.3076923076923077,
+        "brier_score": 0.024895238389826338,
+        "confusion_matrix": {
+          "true_negative": 1923,
+          "false_positive": 9,
+          "false_negative": 54,
+          "true_positive": 14
+        },
+        "calibration_curve": [
+          {
+            "bin_lower": 0.0,
+            "bin_upper": 0.1,
+            "observation_count": 1855,
+            "mean_predicted_probability": 0.01293117894932505,
+            "observed_failure_rate": 0.010242587601078167
+          },
+          {
+            "bin_lower": 0.1,
+            "bin_upper": 0.2,
+            "observation_count": 77,
+            "mean_predicted_probability": 0.13772090838095055,
+            "observed_failure_rate": 0.2597402597402597
+          },
+          {
+            "bin_lower": 0.2,
+            "bin_upper": 0.3,
+            "observation_count": 24,
+            "mean_predicted_probability": 0.24002500066990162,
+            "observed_failure_rate": 0.2916666666666667
+          },
+          {
+            "bin_lower": 0.3,
+            "bin_upper": 0.4,
+            "observation_count": 12,
+            "mean_predicted_probability": 0.3431807546523798,
+            "observed_failure_rate": 0.4166666666666667
+          },
+          {
+            "bin_lower": 0.4,
+            "bin_upper": 0.5,
+            "observation_count": 9,
+            "mean_predicted_probability": 0.4622523239617634,
+            "observed_failure_rate": 0.3333333333333333
+          },
+          {
+            "bin_lower": 0.5,
+            "bin_upper": 0.6,
+            "observation_count": 7,
+            "mean_predicted_probability": 0.5364210256138378,
+            "observed_failure_rate": 0.7142857142857143
+          },
+          {
+            "bin_lower": 0.6,
+            "bin_upper": 0.7,
+            "observation_count": 4,
+            "mean_predicted_probability": 0.6288674319579037,
+            "observed_failure_rate": 0.25
+          },
+          {
+            "bin_lower": 0.7,
+            "bin_upper": 0.8,
+            "observation_count": 4,
+            "mean_predicted_probability": 0.7510056662461407,
+            "observed_failure_rate": 0.5
+          },
+          {
+            "bin_lower": 0.8,
+            "bin_upper": 0.9,
+            "observation_count": 3,
+            "mean_predicted_probability": 0.8452671240575748,
+            "observed_failure_rate": 1.0
+          },
+          {
+            "bin_lower": 0.9,
+            "bin_upper": 1.0,
+            "observation_count": 5,
+            "mean_predicted_probability": 0.9301877616660829,
+            "observed_failure_rate": 0.6
+          }
+        ],
+        "threshold": 0.5
+      },
+      "calibration_method": "sigmoid calibration with 3-fold cross-validation",
+      "note": "Metrics are calculated on a stratified test set untouched by estimator fitting and probability calibration. Accuracy is intentionally not reported."
+    },
+    {
+      "model_name": "random_forest",
+      "feature_set": "engineering_augmented",
+      "input_features": [
+        "Type",
+        "Air temperature [K]",
+        "Process temperature [K]",
+        "Rotational speed [rpm]",
+        "Torque [Nm]",
+        "Tool wear [min]",
+        "Temperature delta [K]",
+        "Mechanical power [W]",
+        "Overstrain load [min Nm]"
+      ],
+      "train_observation_count": 8000,
+      "test_observation_count": 2000,
+      "train_failure_rate": 0.033875,
+      "test_failure_rate": 0.034,
+      "uncalibrated": {
+        "pr_auc": 0.8713452096359052,
+        "roc_auc": 0.9709041225185727,
+        "precision": 0.9482758620689655,
+        "recall": 0.8088235294117647,
+        "f1": 0.873015873015873,
+        "brier_score": 0.008976868930763793,
+        "confusion_matrix": {
+          "true_negative": 1929,
+          "false_positive": 3,
+          "false_negative": 13,
+          "true_positive": 55
+        },
+        "calibration_curve": [
+          {
+            "bin_lower": 0.0,
+            "bin_upper": 0.1,
+            "observation_count": 1853,
+            "mean_predicted_probability": 0.005865730311202281,
+            "observed_failure_rate": 0.0037776578521316784
+          },
+          {
+            "bin_lower": 0.1,
+            "bin_upper": 0.2,
+            "observation_count": 64,
+            "mean_predicted_probability": 0.14222550333318595,
+            "observed_failure_rate": 0.046875
+          },
+          {
+            "bin_lower": 0.2,
+            "bin_upper": 0.3,
+            "observation_count": 16,
+            "mean_predicted_probability": 0.24129456457051948,
+            "observed_failure_rate": 0.0625
+          },
+          {
+            "bin_lower": 0.3,
+            "bin_upper": 0.4,
+            "observation_count": 4,
+            "mean_predicted_probability": 0.3493110168057839,
+            "observed_failure_rate": 0.0
+          },
+          {
+            "bin_lower": 0.4,
+            "bin_upper": 0.5,
+            "observation_count": 5,
+            "mean_predicted_probability": 0.4586541052223135,
+            "observed_failure_rate": 0.4
+          },
+          {
+            "bin_lower": 0.5,
+            "bin_upper": 0.6,
+            "observation_count": 5,
+            "mean_predicted_probability": 0.5647397194533154,
+            "observed_failure_rate": 0.8
+          },
+          {
+            "bin_lower": 0.6,
+            "bin_upper": 0.7,
+            "observation_count": 4,
+            "mean_predicted_probability": 0.6272869638490972,
+            "observed_failure_rate": 1.0
+          },
+          {
+            "bin_lower": 0.7,
+            "bin_upper": 0.8,
+            "observation_count": 15,
+            "mean_predicted_probability": 0.7521519998345877,
+            "observed_failure_rate": 1.0
+          },
+          {
+            "bin_lower": 0.8,
+            "bin_upper": 0.9,
+            "observation_count": 17,
+            "mean_predicted_probability": 0.8458287645287899,
+            "observed_failure_rate": 0.8823529411764706
+          },
+          {
+            "bin_lower": 0.9,
+            "bin_upper": 1.0,
+            "observation_count": 17,
+            "mean_predicted_probability": 0.939392532813547,
+            "observed_failure_rate": 1.0
+          }
+        ],
+        "threshold": 0.5
+      },
+      "calibrated": {
+        "pr_auc": 0.8711826476399575,
+        "roc_auc": 0.9779449823407624,
+        "precision": 0.9482758620689655,
+        "recall": 0.8088235294117647,
+        "f1": 0.873015873015873,
+        "brier_score": 0.007567496201994587,
+        "confusion_matrix": {
+          "true_negative": 1929,
+          "false_positive": 3,
+          "false_negative": 13,
+          "true_positive": 55
+        },
+        "calibration_curve": [
+          {
+            "bin_lower": 0.0,
+            "bin_upper": 0.1,
+            "observation_count": 1932,
+            "mean_predicted_probability": 0.005729892765086291,
+            "observed_failure_rate": 0.005175983436853002
+          },
+          {
+            "bin_lower": 0.1,
+            "bin_upper": 0.2,
+            "observation_count": 1,
+            "mean_predicted_probability": 0.17199591962579963,
+            "observed_failure_rate": 0.0
+          },
+          {
+            "bin_lower": 0.2,
+            "bin_upper": 0.3,
+            "observation_count": 4,
+            "mean_predicted_probability": 0.2372519357961066,
+            "observed_failure_rate": 0.25
+          },
+          {
+            "bin_lower": 0.3,
+            "bin_upper": 0.4,
+            "observation_count": 2,
+            "mean_predicted_probability": 0.35947646744010103,
+            "observed_failure_rate": 1.0
+          },
+          {
+            "bin_lower": 0.4,
+            "bin_upper": 0.5,
+            "observation_count": 3,
+            "mean_predicted_probability": 0.4316405967817262,
+            "observed_failure_rate": 0.0
+          },
+          {
+            "bin_lower": 0.6,
+            "bin_upper": 0.7,
+            "observation_count": 5,
+            "mean_predicted_probability": 0.6524680836863815,
+            "observed_failure_rate": 0.8
+          },
+          {
+            "bin_lower": 0.7,
+            "bin_upper": 0.8,
+            "observation_count": 2,
+            "mean_predicted_probability": 0.7708595465371126,
+            "observed_failure_rate": 1.0
+          },
+          {
+            "bin_lower": 0.8,
+            "bin_upper": 0.9,
+            "observation_count": 7,
+            "mean_predicted_probability": 0.8538576414618271,
+            "observed_failure_rate": 1.0
+          },
+          {
+            "bin_lower": 0.9,
+            "bin_upper": 1.0,
+            "observation_count": 44,
+            "mean_predicted_probability": 0.9720483316604177,
+            "observed_failure_rate": 0.9545454545454546
+          }
+        ],
+        "threshold": 0.5
+      },
+      "calibration_method": "sigmoid calibration with 3-fold cross-validation",
+      "note": "Metrics are calculated on a stratified test set untouched by estimator fitting and probability calibration. Accuracy is intentionally not reported."
+    }
+  ],
+  "leakage_excluded_columns": [
+    "Machine failure",
+    "TWF",
+    "HDF",
+    "PWF",
+    "OSF",
+    "RNF"
+  ],
+  "note": "The raw and engineering-augmented feature sets exclude the target and every failure-mode flag. Calibrated probabilities are risk evidence, not certainty."
+}

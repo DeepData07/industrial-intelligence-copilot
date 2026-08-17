@@ -316,10 +316,15 @@ export default function App() {
         if (activeScenarioRef.current === requestedScenario && activeSessionRef.current === requestedSession) setLiveError(error.message);
       });
   }, [scenario, cycle, sessionRevision, speed, total]);
-  const history = live?.history || localHistory;
-  const state = live || history[history.length - 1];
+  // A hosted backend can respond after the UI has advanced several simulated
+  // cycles (especially on a free-tier service waking from idle). Never mix a
+  // current header cycle with an older backend history: use the deterministic
+  // scenario projection until the matching backend snapshot arrives.
+  const liveIsCurrent = Boolean(live && live.cycle >= cycle);
+  const history = liveIsCurrent ? live.history : localHistory;
+  const state = liveIsCurrent ? live : history[history.length - 1];
   const previous = history[history.length - 2];
-  const syncing = Boolean(live && live.cycle < cycle);
+  const syncing = Boolean(live && !liveIsCurrent);
   const localChange = useMemo(() => changes(history), [history]);
   const localSimilar = useMemo(() => similarity(state), [state]);
   const change = live?.changes || localChange;

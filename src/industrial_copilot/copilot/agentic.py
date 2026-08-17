@@ -70,7 +70,7 @@ class BoundedIncidentAgent:
     ) -> AgenticIncidentResult:
         context = resolve_live_context(scenario=scenario, cycle=cycle, incident_id=package.incident_id, state=state)
         registry = _incident_registry(package)
-        plan, planner_status = self._plan(question, context, registry)
+        plan, planner_status = self._plan(question, context, registry, mode=mode)
         calls = plan.tool_calls[: self.settings.agent_max_initial_tools]
         executed, tool_trace = _execute_calls(registry, calls)
         knowledge_atoms, knowledge_trace = self._knowledge_atoms(plan, question, scenario, cycle, package.incident_id)
@@ -154,8 +154,24 @@ class BoundedIncidentAgent:
             ai_warning=warning,
         )
 
-    def _plan(self, question: str, context, registry: ToolRegistry) -> tuple[InvestigationPlan, str]:
-        if self.settings.llm_enabled and self.settings.groq_api_key and self.settings.agentic_planner_enabled:
+    def _plan(
+        self,
+        question: str,
+        context,
+        registry: ToolRegistry,
+        *,
+        mode: str,
+    ) -> tuple[InvestigationPlan, str]:
+        # Quick mode deliberately uses the reviewed deterministic investigation
+        # plan. This leaves one Groq request for the useful natural-language
+        # explanation instead of spending an additional request on planning.
+        # Deep mode retains AI planning for its richer evidence trace.
+        if (
+            mode == "deep"
+            and self.settings.llm_enabled
+            and self.settings.groq_api_key
+            and self.settings.agentic_planner_enabled
+        ):
             try:
                 text = self._groq_json(planner_prompt(question, context, registry.describe_with_schemas()))
                 plan = parse_plan(text)
@@ -241,9 +257,12 @@ class BoundedIncidentAgent:
                 {"role": "user", "content": provider_prompt},
             ],
             temperature=0.0,
+            reasoning_effort="low",
             # gpt-oss allocates part of this shared budget to reasoning; 900 can
-            # truncate a valid JSON answer before its closing brace.
-            max_completion_tokens=1_800,
+            # truncate a valid JSON answer before its closing brace. Low reasoning
+            # and a 1,200-token cap preserve valid JSON while being friendlier to
+            # the Groq free-tier token-per-minute budget.
+            max_completion_tokens=1_200,
         )
         return (response.choices[0].message.content or "").strip()
 

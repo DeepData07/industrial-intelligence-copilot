@@ -33,8 +33,8 @@ No Docker, Poetry, uv, database, Jupyter, or globally installed Python/Node pack
 ## 1. Clone the repository
 
 ```powershell
-git clone https://github.com/YOUR_USERNAME/industrial-intelligence-copilot.git
-cd industrial-intelligence-copilot
+git clone ...(http/ssh)
+cd ...(folder directory in which you cloned it)
 ```
 
 Replace the URL with the actual GitHub repository URL.

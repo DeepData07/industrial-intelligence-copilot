@@ -234,7 +234,7 @@ def create_app(service: IndustrialCopilotService | None = None) -> FastAPI:
             "ai_generated": response.ai_generated,
             "ai_status": response.ai_status,
             "ai_provider": get_settings().llm_provider if response.ai_generated else None,
-            "ai_model": get_settings().groq_model if response.ai_generated else None,
+            "ai_model": get_settings().active_llm_model if response.ai_generated else None,
             "ai_warning": response.ai_warning,
             "evidence": list(evidence.calculations_run),
             "findings": [finding.statement for finding in evidence.findings],

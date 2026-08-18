@@ -187,6 +187,7 @@ function LegacyCopilot({ incident, scenario, cycle, state }) {
         limitations: result.limitations || [],
         aiGenerated: result.ai_generated,
         aiStatus: result.ai_status,
+        aiProvider: result.ai_provider,
         aiModel: result.ai_model,
         aiWarning: result.ai_warning,
       }]);
@@ -257,9 +258,9 @@ function Copilot({ incident, scenario, cycle, state }) {
     <div className="copilot-mode"><span>Investigation</span><button className={mode === "quick" ? "selected" : ""} onClick={() => setMode("quick")} disabled={asking}>Quick</button><button className={mode === "deep" ? "selected" : ""} onClick={() => setMode("deep")} disabled={asking}>Deep</button></div>
     {asking && <div className="investigation-progress">Understanding question · running evidence checks · building grounded answer</div>}
     <div className="conversation">
-      {turns.length === 0 && <div className="empty"><b>{incident ? "Bounded Groq investigation" : `${scenario} monitoring context`}</b><br/>{incident ? "The AI chooses only permitted evidence checks. Backend calculations, citations and safety validation remain authoritative." : "No incident is open. You can still ask about the latest verified machine state."}</div>}
+      {turns.length === 0 && <div className="empty"><b>{incident ? "Bounded AI investigation" : `${scenario} monitoring context`}</b><br/>{incident ? "The AI chooses only permitted evidence checks. Backend calculations, citations and safety validation remain authoritative." : "No incident is open. You can still ask about the latest verified machine state."}</div>}
       {turns.map((turn, index) => <div className="turn" key={index}><div className="question">{turn.question}</div><div className="answer">
-        <span className={`ai-source ${turn.aiGenerated ? "generated" : "fallback"}`}>{turn.aiGenerated ? `Groq AI · ${turn.aiModel}` : turn.aiStatus === "not_applicable" ? "Live scenario context" : "Verified fallback"}</span>
+        <span className={`ai-source ${turn.aiGenerated ? "generated" : "fallback"}`}>{turn.aiGenerated ? `${turn.aiProvider === "together" ? "Together AI" : turn.aiProvider === "groq" ? "Groq AI" : "Gemini AI"} · ${turn.aiModel}` : turn.aiStatus === "not_applicable" ? "Live scenario context" : "Verified fallback"}</span>
         <b>{turn.answer}</b>
         {(turn.verifiedAnswer || turn.evidence.length > 0) && <details><summary>Verified deterministic evidence</summary>{turn.verifiedAnswer && <p className="verified-answer">{turn.verifiedAnswer}</p>}{turn.evidence.length > 0 && <p>{turn.evidence.join(" · ")}</p>}</details>}
         {turn.citations?.length > 0 && <details><summary>Evidence atoms used ({turn.citations.length})</summary><div className="citation-list">{turn.citations.map(atom => <p key={atom.id}><b>[{atom.id}]</b> {atom.display_value ? `${atom.statement}: ${atom.display_value}` : atom.statement}<small>{authority(atom.authority)}</small></p>)}</div></details>}

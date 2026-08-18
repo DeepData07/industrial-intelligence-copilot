@@ -10,7 +10,7 @@ Install these before starting:
 - Python 3.11.x
 - Node.js 18.16 or newer
 - npm — included automatically with Node.js
-- Internet connection — required during the first installation and for optional Groq AI responses
+- Internet connection — required during the first installation and for optional Together AI responses
 
 Check that they are installed:
 
@@ -88,12 +88,7 @@ python -m venv .venv
 
 ## 5. Configure `.env`
 
-### Case A — `.env` already exists and contains a valid Groq key
-
-Make the .env file exactly like this - https://docs.google.com/document/d/1GudLLCB3ML70q4o9Afk6IiJCf9dwKu7nKtRO0dpBQ38/edit?usp=sharing
-No extra configuration is needed. Continue to Step 6.
-
-### Case B — `.env` does not exist
+### Case A — `.env` does not exist
 
 Create it:
 
@@ -107,22 +102,22 @@ Then open it:
 notepad .env
 ```
 
-### Case C — use Groq AI
+### Case B — use Together AI
 
 Set these values in `.env`:
 
 ```dotenv
 LLM_ENABLED=true
-LLM_PROVIDER=groq
-GROQ_API_KEY=YOUR_GROQ_API_KEY
-GROQ_MODEL=openai/gpt-oss-120b
-GROQ_TIMEOUT_SECONDS=20
+LLM_PROVIDER=together
+TOGETHER_API_KEY=YOUR_TOGETHER_API_KEY
+TOGETHER_MODEL=openai/gpt-oss-120b
+TOGETHER_TIMEOUT_SECONDS=20
 ```
 
-Test Groq:
+Test Together:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\check_groq.py
+.\.venv\Scripts\python.exe scripts\check_together.py
 ```
 
 Expected result:
@@ -131,21 +126,21 @@ Expected result:
 Result: AVAILABLE
 ```
 
-### Case D — no Groq key, invalid key, or Groq free-tier rate limit
+### Case C — no Together key, invalid key, or Together provider error
 
 Set:
 
 ```dotenv
 LLM_ENABLED=false
-LLM_PROVIDER=groq
-GROQ_API_KEY=
+LLM_PROVIDER=together
+TOGETHER_API_KEY=
 ```
 
 The project still works normally.
 
 The dashboard, data analysis, ML risk model, scenarios, charts, incidents, what-if analysis, and maintenance workflow remain available.
 
-The Copilot will return verified deterministic evidence instead of a Groq-generated response.
+The Copilot will return verified deterministic evidence instead of a Together-generated response.
 
 ## 6. Install frontend dependencies
 
@@ -268,6 +263,6 @@ cd frontend
 npm run dev
 ```
 
-### Groq answer shows `Verified fallback`
+### Together answer shows `Verified fallback`
 
-This is expected when Groq is disabled, the key is unavailable, the key is invalid, or the Groq free-tier limit is temporarily reached. The application remains usable.
+This is expected when Together is disabled, the key is unavailable, the key is invalid, the account has no remaining credits, or Together is temporarily unavailable. The application remains usable.

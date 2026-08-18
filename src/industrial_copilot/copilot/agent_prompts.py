@@ -34,6 +34,10 @@ Every statement must cite one or more exact evidence atom IDs. Use only the supp
 You may repeat verified values only if they occur in cited atoms. Do not invent readings, timing, causes, thresholds, maintenance history, root cause, remaining useful life, or commands.
 `dataset_rule` applies only to AI4I synthetic mechanics. `engineering_reference` gives real-world context, not proof of this incident. `system_limit` states missing data.
 Keep the answer concise and useful. For a suggested inspection, use cautious advisory wording.
+If the question asks what parameter to change or by how much, use only an exact
+`Rule-based OSF decision-support options` atom. Explain that it is a what-if target
+requiring engineer approval, not a command or guaranteed resolution. If that atom is
+absent, say that no exact amount is supported instead of inventing one.
 
 QUESTION: {question}
 CONTEXT: {context.model_dump_json()}

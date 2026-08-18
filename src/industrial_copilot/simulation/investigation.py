@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections import Counter
 
 import numpy as np
@@ -82,6 +83,22 @@ class HistoricalSimilaritySummary(BaseModel):
     note: str
 
 
+class AdjustmentOption(BaseModel):
+    """One deterministic operating adjustment for a documented rule margin."""
+
+    model_config = ConfigDict(frozen=True)
+
+    parameter: str
+    action: str
+    current_value: float
+    proposed_value: float
+    change_amount: float
+    change_percent: float
+    unit: str
+    expected_osf_margin_min_nm: float
+    basis: str
+
+
 class IncidentInvestigationPackage(BaseModel):
     """Compact package combining incident, change, and historical-memory evidence."""
 
@@ -92,6 +109,7 @@ class IncidentInvestigationPackage(BaseModel):
     session_id: str
     what_changed: WhatChangedResult
     similar_historical_conditions: HistoricalSimilaritySummary
+    adjustment_options: tuple[AdjustmentOption, ...] = ()
     limitations: tuple[str, ...]
 
 
@@ -226,11 +244,72 @@ def build_incident_investigation_package(
         session_id=incident.session_id,
         what_changed=what_changed,
         similar_historical_conditions=similar,
+        adjustment_options=_osf_adjustment_options(twin_state),
         limitations=(
             *incident.context.limitations,
             "Similar cases are AI4I historical observations, not real timestamped plant events.",
         ),
     )
+
+
+def _osf_adjustment_options(
+    twin_state: OperationalTwinState,
+    *,
+    target_margin_min_nm: float = 1000.0,
+) -> tuple[AdjustmentOption, ...]:
+    """Return cautious OSF rule-margin options, not autonomous control commands."""
+
+    telemetry = twin_state.current_telemetry
+    engineered = twin_state.engineered
+    margins = twin_state.rule_margins
+    if telemetry is None or engineered is None or margins is None:
+        return ()
+    if margins.osf_remaining_margin_min_nm > target_margin_min_nm:
+        return ()
+
+    allowed_load = max(0.0, engineered.overstrain_threshold_min_nm - target_margin_min_nm)
+    options: list[AdjustmentOption] = []
+    if telemetry.tool_wear_min > 0:
+        proposed_torque = math.floor((allowed_load / telemetry.tool_wear_min) * 10) / 10
+        if proposed_torque < telemetry.torque_nm:
+            reduction = telemetry.torque_nm - proposed_torque
+            options.append(
+                AdjustmentOption(
+                    parameter="Torque",
+                    action="reduce",
+                    current_value=telemetry.torque_nm,
+                    proposed_value=proposed_torque,
+                    change_amount=reduction,
+                    change_percent=reduction / telemetry.torque_nm,
+                    unit="Nm",
+                    expected_osf_margin_min_nm=(
+                        engineered.overstrain_threshold_min_nm
+                        - proposed_torque * telemetry.tool_wear_min
+                    ),
+                    basis="AI4I OSF load equals torque multiplied by tool wear.",
+                )
+            )
+    if telemetry.torque_nm > 0:
+        proposed_wear = math.floor((allowed_load / telemetry.torque_nm) * 10) / 10
+        if proposed_wear < telemetry.tool_wear_min:
+            reduction = telemetry.tool_wear_min - proposed_wear
+            options.append(
+                AdjustmentOption(
+                    parameter="Effective tool wear after service or replacement",
+                    action="service or replace the tool",
+                    current_value=telemetry.tool_wear_min,
+                    proposed_value=proposed_wear,
+                    change_amount=reduction,
+                    change_percent=reduction / telemetry.tool_wear_min,
+                    unit="min",
+                    expected_osf_margin_min_nm=(
+                        engineered.overstrain_threshold_min_nm
+                        - telemetry.torque_nm * proposed_wear
+                    ),
+                    basis="AI4I OSF load equals torque multiplied by tool wear.",
+                )
+            )
+    return tuple(options)
 
 
 def _feature_change(feature: str, baseline_mean: float, recent_mean: float) -> FeatureChange:

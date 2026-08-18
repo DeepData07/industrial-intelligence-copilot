@@ -112,11 +112,13 @@ class BoundedIncidentAgent:
         valid = False
         if structured is not None:
             structured = repair_numeric_citations(structured, ledger)
-            valid, _validation_warning = validate_grounded_answer(structured, ledger)
+            valid, validation_warning = validate_grounded_answer(structured, ledger)
             if not valid:
                 # Fail closed without spending a second provider request. The
                 # deterministic answer below already contains the verified result.
                 structured, ai_status, warning = None, "invalid_output", None
+            elif validation_warning:
+                warning = validation_warning
         answer = (
             _render_structured_answer(structured)
             if structured is not None
@@ -330,7 +332,7 @@ def _fallback_plan(question: str) -> InvestigationPlan:
         calls = [calls[2]]
     elif "rpm" in normalized or "speed" in normalized:
         calls = [calls[1], calls[0]]
-    elif "check" in normalized or "inspect" in normalized:
+    elif any(item in normalized for item in ("check", "inspect", "parameter", "by how much", "adjust", "reduce", "resolve")):
         calls = [calls[0], calls[1]]
     mode = _failure_mode_for_question(normalized)
     return InvestigationPlan(

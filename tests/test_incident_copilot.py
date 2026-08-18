@@ -46,6 +46,25 @@ def test_incident_copilot_tests_rpm_hypothesis_against_current_window(sample_ai4
     assert response.evidence.findings[0].source_tools == ["calculate_what_changed"]
 
 
+def test_incident_copilot_calculates_rule_based_adjustment_options(sample_ai4i_frame) -> None:
+    package = _osf_incident_package(sample_ai4i_frame)
+    service = IndustrialCopilotService(frame=sample_ai4i_frame, llm_enabled=False)
+
+    response = service.ask_about_incident(
+        "What parameter should I change to resolve this and by how much?",
+        package,
+    )
+
+    assert package.adjustment_options
+    torque = package.adjustment_options[0]
+    assert torque.parameter == "Torque"
+    assert torque.proposed_value < torque.current_value
+    assert torque.expected_osf_margin_min_nm >= 1000
+    assert "reduce torque from" in response.answer
+    assert "What-if analysis" in response.answer
+    assert response.evidence.findings[0].source_tools[0] == "calculate_rule_based_adjustment"
+
+
 def test_incident_copilot_keeps_normal_dataset_flow_unchanged(sample_ai4i_frame) -> None:
     package = _osf_incident_package(sample_ai4i_frame)
     service = IndustrialCopilotService(frame=sample_ai4i_frame, llm_enabled=False)

@@ -70,6 +70,8 @@ def _findings_for(
         return [_similarity_finding(package)]
     if _asks_rpm(normalized_question):
         return [_rpm_finding(package)]
+    if _asks_adjustment(normalized_question):
+        return [_adjustment_finding(package)]
     if _asks_action(normalized_question):
         return [_action_finding(package)]
     if _asks_confidence(normalized_question):
@@ -145,6 +147,44 @@ def _action_finding(package: IncidentInvestigationPackage) -> EvidenceFinding:
         checks.append("compare current telemetry with the recent healthy baseline")
     statement = "Suggested next checks: " + "; ".join(checks) + "."
     return EvidenceFinding(statement=statement, source_tools=["incident_context_package"])
+
+
+def _adjustment_finding(package: IncidentInvestigationPackage) -> EvidenceFinding:
+    if not package.adjustment_options:
+        statement = (
+            "No exact parameter adjustment is supported by the current evidence. Use the "
+            "backend What-if analysis and obtain engineer approval before changing operation."
+        )
+    else:
+        options = []
+        for option in package.adjustment_options:
+            if option.parameter == "Torque":
+                options.append(
+                    f"reduce torque from {option.current_value:.1f} to no more than "
+                    f"{option.proposed_value:.1f} {option.unit} "
+                    f"(a reduction of {option.change_amount:.1f} {option.unit}, "
+                    f"{option.change_percent:.1%})"
+                )
+            else:
+                options.append(
+                    f"{option.action} so {option.parameter.casefold()} moves from "
+                    f"{option.current_value:.1f} to no more than {option.proposed_value:.1f} "
+                    f"{option.unit}"
+                )
+        expected_margin = min(
+            option.expected_osf_margin_min_nm for option in package.adjustment_options
+        )
+        statement = (
+            "Rule-based OSF decision-support options: "
+            + "; or ".join(options)
+            + f". Each option targets an OSF margin of at least {expected_margin:.0f} min Nm. "
+            "Validate the proposal in What-if analysis and obtain engineer approval; this is "
+            "not a machine command or a guarantee that model risk will clear."
+        )
+    return EvidenceFinding(
+        statement=statement,
+        source_tools=["calculate_rule_based_adjustment", "incident_context_package"],
+    )
 
 
 def _confidence_finding(package: IncidentInvestigationPackage) -> EvidenceFinding:
@@ -223,6 +263,16 @@ def _asks_rpm(question: str) -> bool:
 
 def _asks_action(question: str) -> bool:
     return bool(re.search(r"\binspect|check|next|action|do first\b", question))
+
+
+def _asks_adjustment(question: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(by how much|what (?:value|parameter)|adjust|reduce|lower|increase|"
+            r"change.*(?:resolve|clear|fix)|parameter.*change)\b",
+            question,
+        )
+    )
 
 
 def _asks_confidence(question: str) -> bool:

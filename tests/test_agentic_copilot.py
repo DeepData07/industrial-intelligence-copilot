@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from industrial_copilot.config import Settings
 from industrial_copilot.copilot.agentic import BoundedIncidentAgent
 from industrial_copilot.copilot.schemas import (
@@ -136,6 +138,52 @@ def test_evidence_fallback_honors_simple_language_request(sample_ai4i_frame) -> 
     assert "similar AI4I examples" in result.answer
     assert "Confidence note" in result.answer
     assert "Incident INC-" not in result.answer
+
+
+def test_adjustment_question_can_be_answered_by_grounded_ai(
+    sample_ai4i_frame,
+    monkeypatch,
+) -> None:
+    package = _package(sample_ai4i_frame)
+    option = package.adjustment_options[0]
+    agent = BoundedIncidentAgent(
+        settings=Settings(
+            llm_enabled=True,
+            llm_provider="together",
+            together_api_key="test-key",
+            agentic_planner_enabled=False,
+        )
+    )
+    answer_text = (
+        f"A rule-based option is to reduce torque from {option.current_value:.1f} to "
+        f"{option.proposed_value:.1f} {option.unit}. Validate this in What-if analysis "
+        "and obtain engineer approval."
+    )
+
+    monkeypatch.setattr(
+        agent,
+        "_provider_json",
+        lambda _prompt: json.dumps(
+            {
+                "answer": {"text": answer_text, "claim_ids": ["F1"]},
+                "evidence": [],
+                "next_checks": [],
+                "limitations": [],
+            }
+        ),
+    )
+    result = agent.investigate(
+        "What parameter should I change to resolve this and by how much?",
+        package,
+        scenario="OSF",
+        cycle=12,
+        mode="quick",
+    )
+
+    assert result.ai_generated is True
+    assert result.ai_status == "generated"
+    assert answer_text in result.answer
+    assert result.trace.grounding_status == "validated"
 
 
 def test_agent_never_executes_unknown_tool_from_a_malicious_plan(sample_ai4i_frame, monkeypatch) -> None:

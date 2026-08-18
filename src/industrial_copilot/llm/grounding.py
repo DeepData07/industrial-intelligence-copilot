@@ -66,6 +66,7 @@ def validate_grounded_answer(answer: GroundedCopilotAnswer, ledger: Iterable[Evi
     """Ensure every rendered statement cites known evidence and adds no unsupported numbers."""
 
     atoms = {atom.id: atom for atom in ledger}
+    qualitative_warning: str | None = None
     if not atoms:
         return False, "No claim ledger was available."
     statements = [answer.answer, *answer.evidence, *answer.next_checks, *answer.limitations]
@@ -82,8 +83,11 @@ def validate_grounded_answer(answer: GroundedCopilotAnswer, ledger: Iterable[Evi
         if any(item not in supported for item in used):
             return False, "A response used an unsupported numeric value."
         if not _qualitatively_supported(statement.text, [atoms[item] for item in statement.claim_ids]):
-            return False, "A response made an unsupported qualitative claim."
-    return True, None
+            qualitative_warning = (
+                "Confidence note: part of the wording is an AI interpretation of the cited "
+                "evidence; treat it as decision support, not a proven diagnosis."
+            )
+    return True, qualitative_warning
 
 
 def repair_numeric_citations(

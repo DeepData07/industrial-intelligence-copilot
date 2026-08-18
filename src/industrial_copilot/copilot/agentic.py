@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from dataclasses import dataclass
 from typing import Any
@@ -119,7 +120,7 @@ class BoundedIncidentAgent:
         answer = (
             _render_structured_answer(structured)
             if structured is not None
-            else _render_evidence_based_answer(verified_answer)
+            else _render_evidence_based_answer(question, verified_answer, package)
         )
         trace = InvestigationTrace(
             trace_id=uuid.uuid4().hex,
@@ -380,13 +381,49 @@ def _render_structured_answer(answer: GroundedCopilotAnswer | None) -> str:
     return "\n\n".join(parts)
 
 
-def _render_evidence_based_answer(verified_answer: str) -> str:
-    """Present deterministic evidence as a complete answer, not a failed interaction."""
+def _render_evidence_based_answer(
+    question: str,
+    verified_answer: str,
+    package: IncidentInvestigationPackage,
+) -> str:
+    """Present verified evidence naturally when provider prose cannot be used."""
 
-    return (
-        f"Based on the verified evidence for this incident: {verified_answer}\n\n"
-        "Interpretation scope: the reported readings, comparisons and historical-case summary "
-        "come directly from backend calculations. They are reliable for describing this "
-        "simulated scenario, but they do not by themselves prove a root cause or predict "
-        "the outcome of a real machine."
+    normalized = question.casefold()
+    asks_for_simple_language = bool(
+        re.search(r"\b(child|simple|simply|plain|easy|beginner|non[- ]?technical)\b", normalized)
     )
+    confidence_note = (
+        "Confidence note: this explanation is well supported for the simulated incident, "
+        "but it cannot prove the exact root cause or predict a real machine outcome."
+    )
+    if not asks_for_simple_language:
+        return f"{verified_answer}\n\n{confidence_note}"
+
+    top = package.what_changed.largest_changes[0] if package.what_changed.largest_changes else None
+    if top is None:
+        explanation = (
+            "This is a machine warning, not a software error. The system saw an operating "
+            "pattern that needs an engineer to check the machine."
+        )
+    else:
+        feature = re.sub(r"\s*\[[^]]+\]", "", top.feature).strip().casefold()
+        if top.percent_change is not None:
+            change = f"{abs(top.percent_change):.1%}"
+        else:
+            change = f"{abs(top.absolute_change):.2f}"
+        explanation = (
+            "This is a machine warning, not a software error. In simple terms, the machine's "
+            f"{feature} changed the most: it {top.direction} by {change}. "
+        )
+
+    similar = package.similar_historical_conditions
+    if similar.returned_observation_count and similar.similar_case_failure_rate is not None:
+        explanation += (
+            f"Of {similar.returned_observation_count} similar AI4I examples, "
+            f"{similar.failed_observation_count} failed ({similar.similar_case_failure_rate:.1%}). "
+        )
+    explanation += (
+        "That does not mean this machine is certain to fail. The sensible first step is to "
+        "inspect the tool and confirm that the current torque is expected for this job."
+    )
+    return f"{explanation}\n\n{confidence_note}"

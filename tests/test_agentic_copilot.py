@@ -97,7 +97,7 @@ def test_invalid_ai_output_uses_one_provider_call_and_returns_clean_evidence(
     assert result.ai_generated is False
     assert result.ai_status == "invalid_output"
     assert result.ai_warning is None
-    assert "Based on the verified evidence" in result.answer
+    assert "Confidence note" in result.answer
 
 
 def test_agent_falls_back_safely_without_provider_and_records_trace(sample_ai4i_frame) -> None:
@@ -117,7 +117,25 @@ def test_agent_falls_back_safely_without_provider_and_records_trace(sample_ai4i_
     assert result.trace.knowledge_sources
     assert result.evidence.claim_ledger
     assert "Suggested next checks" in result.answer
-    assert "Interpretation scope" in result.answer
+    assert "Confidence note" in result.answer
+
+
+def test_evidence_fallback_honors_simple_language_request(sample_ai4i_frame) -> None:
+    package = _package(sample_ai4i_frame)
+    result = BoundedIncidentAgent(settings=Settings(llm_enabled=False)).investigate(
+        "Can you explain this error like you are explaining it to a child?",
+        package,
+        scenario="OSF",
+        cycle=12,
+        mode="quick",
+    )
+
+    assert result.ai_generated is False
+    assert "machine warning, not a software error" in result.answer
+    assert "In simple terms" in result.answer
+    assert "similar AI4I examples" in result.answer
+    assert "Confidence note" in result.answer
+    assert "Incident INC-" not in result.answer
 
 
 def test_agent_never_executes_unknown_tool_from_a_malicious_plan(sample_ai4i_frame, monkeypatch) -> None:

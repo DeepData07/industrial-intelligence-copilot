@@ -60,6 +60,7 @@ def test_agent_falls_back_safely_without_provider_and_records_trace(sample_ai4i_
     assert result.trace.knowledge_sources
     assert result.evidence.claim_ledger
     assert "Suggested next checks" in result.answer
+    assert "Interpretation scope" in result.answer
 
 
 def test_agent_never_executes_unknown_tool_from_a_malicious_plan(sample_ai4i_frame, monkeypatch) -> None:

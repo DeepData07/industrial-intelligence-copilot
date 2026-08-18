@@ -125,7 +125,11 @@ class BoundedIncidentAgent:
                         structured, warning, ai_status = None, repaired_warning, "invalid_output"
                 else:
                     structured, warning, ai_status = None, repair_warning or validation_warning, "invalid_output"
-        answer = _render_structured_answer(structured) if structured is not None else verified_answer
+        answer = (
+            _render_structured_answer(structured)
+            if structured is not None
+            else _render_evidence_based_answer(verified_answer)
+        )
         trace = InvestigationTrace(
             trace_id=uuid.uuid4().hex,
             scenario_id=scenario,
@@ -218,7 +222,14 @@ class BoundedIncidentAgent:
         correction: str | None = None,
     ) -> tuple[GroundedCopilotAnswer | None, str, str | None]:
         if not (self.settings.llm_enabled and self._provider_key_configured()):
-            return None, "disabled", "AI provider is unavailable; using verified deterministic evidence."
+            return (
+                None,
+                "disabled",
+                (
+                    "This response was prepared directly from verified machine calculations. "
+                    "The optional AI explanation was unavailable for this request."
+                ),
+            )
         try:
             # Conversation is intentionally not raw authority; only short public context is appended to the question.
             prompt = synthesis_prompt(question, ledger, context)
@@ -231,13 +242,13 @@ class BoundedIncidentAgent:
             if conversation:
                 prompt += "\nRECENT_PUBLIC_CONVERSATION: " + json.dumps(conversation[-6:])
             return parse_answer(self._provider_json(prompt)), "generated", None
-        except Exception as error:  # noqa: BLE001 - the only safe behavior is the verified fallback.
+        except Exception:  # noqa: BLE001 - the only safe behavior is the verified fallback.
             return (
                 None,
                 "provider_error",
                 (
-                    f"{self.settings.llm_provider.title()} request did not produce a usable structured answer "
-                    f"({type(error).__name__}); using verified deterministic evidence."
+                    "This response was prepared directly from verified machine calculations. "
+                    "The optional AI explanation was not used because it could not be validated for this request."
                 ),
             )
 
@@ -387,3 +398,15 @@ def _render_structured_answer(answer: GroundedCopilotAnswer | None) -> str:
     if answer.limitations:
         parts.append("Limitation: " + " ".join(item.text for item in answer.limitations))
     return "\n\n".join(parts)
+
+
+def _render_evidence_based_answer(verified_answer: str) -> str:
+    """Present deterministic evidence as a complete answer, not a failed interaction."""
+
+    return (
+        f"Based on the verified evidence for this incident: {verified_answer}\n\n"
+        "Interpretation scope: the reported readings, comparisons and historical-case summary "
+        "come directly from backend calculations. They are reliable for describing this "
+        "simulated scenario, but they do not by themselves prove a root cause or predict "
+        "the outcome of a real machine."
+    )

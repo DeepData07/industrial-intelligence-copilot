@@ -238,6 +238,7 @@ function Copilot({ incident, scenario, cycle, state }) {
         limitations: result.limitations || [],
         aiGenerated: result.ai_generated,
         aiStatus: result.ai_status,
+        aiProvider: result.ai_provider,
         aiModel: result.ai_model,
         aiWarning: result.ai_warning,
         trace: result.investigation_trace,

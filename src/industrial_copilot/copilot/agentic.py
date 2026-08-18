@@ -28,7 +28,11 @@ from industrial_copilot.copilot.schemas import (
 )
 from industrial_copilot.copilot.state import ConversationState
 from industrial_copilot.knowledge.retriever import DomainKnowledgeRetriever
-from industrial_copilot.llm.grounding import build_claim_ledger, validate_grounded_answer
+from industrial_copilot.llm.grounding import (
+    build_claim_ledger,
+    repair_numeric_citations,
+    validate_grounded_answer,
+)
 from industrial_copilot.simulation.investigation import IncidentInvestigationPackage
 from industrial_copilot.tools.registry import RegisteredTool, ToolRegistry
 
@@ -106,25 +110,12 @@ class BoundedIncidentAgent:
         structured, ai_status, warning = self._synthesize(question, ledger, context, conversation)
         valid = False
         if structured is not None:
-            valid, validation_warning = validate_grounded_answer(structured, ledger)
+            structured = repair_numeric_citations(structured, ledger)
+            valid, _validation_warning = validate_grounded_answer(structured, ledger)
             if not valid:
-                # One bounded repair attempt gives the model a chance to remove an
-                # unsupported value. It is not an autonomous retry loop.
-                repaired, repair_status, repair_warning = self._synthesize(
-                    question,
-                    ledger,
-                    context,
-                    conversation,
-                    correction=validation_warning,
-                )
-                if repaired is not None:
-                    repaired_valid, repaired_warning = validate_grounded_answer(repaired, ledger)
-                    if repaired_valid:
-                        structured, valid, ai_status, warning = repaired, True, repair_status, None
-                    else:
-                        structured, warning, ai_status = None, repaired_warning, "invalid_output"
-                else:
-                    structured, warning, ai_status = None, repair_warning or validation_warning, "invalid_output"
+                # Fail closed without spending a second provider request. The
+                # deterministic answer below already contains the verified result.
+                structured, ai_status, warning = None, "invalid_output", None
         answer = (
             _render_structured_answer(structured)
             if structured is not None
@@ -218,8 +209,6 @@ class BoundedIncidentAgent:
         ledger: list[EvidenceAtom],
         context,
         conversation: list[dict[str, str]] | None,
-        *,
-        correction: str | None = None,
     ) -> tuple[GroundedCopilotAnswer | None, str, str | None]:
         if not (self.settings.llm_enabled and self._provider_key_configured()):
             return (
@@ -233,12 +222,6 @@ class BoundedIncidentAgent:
         try:
             # Conversation is intentionally not raw authority; only short public context is appended to the question.
             prompt = synthesis_prompt(question, ledger, context)
-            if correction:
-                prompt += (
-                    "\nREPAIR_REQUIRED: A prior draft was rejected because: "
-                    f"{correction} Rewrite it. Use only exact values present in the cited atoms, "
-                    "and cite every statement."
-                )
             if conversation:
                 prompt += "\nRECENT_PUBLIC_CONVERSATION: " + json.dumps(conversation[-6:])
             return parse_answer(self._provider_json(prompt)), "generated", None
@@ -246,10 +229,7 @@ class BoundedIncidentAgent:
             return (
                 None,
                 "provider_error",
-                (
-                    "This response was prepared directly from verified machine calculations. "
-                    "The optional AI explanation was not used because it could not be validated for this request."
-                ),
+                None,
             )
 
     def _provider_key_configured(self) -> bool:

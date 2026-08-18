@@ -86,6 +86,46 @@ def validate_grounded_answer(answer: GroundedCopilotAnswer, ledger: Iterable[Evi
     return True, None
 
 
+def repair_numeric_citations(
+    answer: GroundedCopilotAnswer,
+    ledger: Iterable[EvidenceAtom],
+) -> GroundedCopilotAnswer:
+    """Attach an existing evidence atom when a verified number was cited imprecisely.
+
+    This only repairs references. It never changes prose, invents a value, or relaxes
+    the grounding validator.
+    """
+
+    ledger_list = list(ledger)
+    atoms = {atom.id: atom for atom in ledger_list}
+
+    def repair(statement):
+        claim_ids = [identifier for identifier in statement.claim_ids if identifier in atoms]
+        cited_numbers = _allowed_numbers(atoms[identifier] for identifier in claim_ids)
+        used_numbers = {_normalise_number(value) for value in NUMBER_RE.findall(statement.text)}
+        for number in sorted(used_numbers - cited_numbers):
+            supporting_id = next(
+                (
+                    atom.id
+                    for atom in ledger_list
+                    if number in _allowed_numbers([atom])
+                ),
+                None,
+            )
+            if supporting_id and supporting_id not in claim_ids:
+                claim_ids.append(supporting_id)
+        return statement.model_copy(update={"claim_ids": claim_ids})
+
+    return answer.model_copy(
+        update={
+            "answer": repair(answer.answer),
+            "evidence": [repair(item) for item in answer.evidence],
+            "next_checks": [repair(item) for item in answer.next_checks],
+            "limitations": [repair(item) for item in answer.limitations],
+        }
+    )
+
+
 def _allowed_numbers(atoms: Iterable[EvidenceAtom]) -> set[str]:
     tokens: set[str] = set()
     for atom in atoms:

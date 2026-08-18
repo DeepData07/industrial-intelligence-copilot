@@ -9,7 +9,7 @@ from industrial_copilot.copilot.schemas import (
     GroundedCopilotAnswer,
     GroundedStatement,
 )
-from industrial_copilot.llm.grounding import validate_grounded_answer
+from industrial_copilot.llm.grounding import repair_numeric_citations, validate_grounded_answer
 from industrial_copilot.simulation.incidents import IncidentEngine
 from industrial_copilot.simulation.investigation import build_incident_investigation_package
 from industrial_copilot.simulation.scenarios import generate_osf_scenario
@@ -41,6 +41,63 @@ def test_grounding_rejects_invented_number_and_unknown_citation() -> None:
     assert validate_grounded_answer(valid, ledger)[0]
     assert not validate_grounded_answer(invented, ledger)[0]
     assert not validate_grounded_answer(unknown, ledger)[0]
+
+
+def test_grounding_repairs_a_verified_number_cited_to_the_wrong_atom() -> None:
+    ledger = [
+        EvidenceAtom(id="M1", kind="metric", statement="RPM change", display_value="-0.1%", source="change"),
+        EvidenceAtom(id="M2", kind="metric", statement="Overstrain load change", display_value="8.7%", source="change"),
+    ]
+    imprecisely_cited = GroundedCopilotAnswer(
+        answer=GroundedStatement(
+            text="RPM decreased by -0.1%, while overstrain load increased by 8.7%.",
+            claim_ids=["M1"],
+        )
+    )
+
+    repaired = repair_numeric_citations(imprecisely_cited, ledger)
+
+    assert repaired.answer.claim_ids == ["M1", "M2"]
+    assert validate_grounded_answer(repaired, ledger)[0]
+
+
+def test_invalid_ai_output_uses_one_provider_call_and_returns_clean_evidence(
+    sample_ai4i_frame,
+    monkeypatch,
+) -> None:
+    package = _package(sample_ai4i_frame)
+    agent = BoundedIncidentAgent(
+        settings=Settings(
+            llm_enabled=True,
+            llm_provider="together",
+            together_api_key="test-key",
+            agentic_planner_enabled=False,
+        )
+    )
+    calls = 0
+
+    def invalid_answer(_prompt: str) -> str:
+        nonlocal calls
+        calls += 1
+        return (
+            '{"answer":{"text":"Calibrated risk is 999%.","claim_ids":["M1"]},'
+            '"evidence":[],"next_checks":[],"limitations":[]}'
+        )
+
+    monkeypatch.setattr(agent, "_provider_json", invalid_answer)
+    result = agent.investigate(
+        "Is RPM contributing?",
+        package,
+        scenario="OSF",
+        cycle=12,
+        mode="quick",
+    )
+
+    assert calls == 1
+    assert result.ai_generated is False
+    assert result.ai_status == "invalid_output"
+    assert result.ai_warning is None
+    assert "Based on the verified evidence" in result.answer
 
 
 def test_agent_falls_back_safely_without_provider_and_records_trace(sample_ai4i_frame) -> None:
